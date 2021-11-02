@@ -5,12 +5,12 @@
 .def temp=r19
 
 .macro outi
-LDI 	temp,@1 			
-OUT 	@0,temp 	
+	ldi	temp,@1 			
+	out @0,temp 	
 .endm
 
 .cseg
-.org 0
+.org 0x00
 jmp init
 
 .org 0x1C//ADC Conversion Complete Handler
