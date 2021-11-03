@@ -4,11 +4,6 @@
 .def port1=r18
 .def temp=r19
 
-.macro outi
-	ldi	temp,@1 			
-	out @0,temp 	
-.endm
-
 .cseg
 .org 0x00
 jmp init
@@ -19,13 +14,7 @@ jmp ADC_handler
 .org 100
 
 ADC_handler:
-	push r15//CPI
-	in r15, sreg
-	
 	call handler_part
-	
-	out sreg, r15
-	pop r15
 	reti
 
 init:
@@ -41,13 +30,17 @@ init:
 	ldi flag, 0 
 	sei 
 	
-	outi TCCR0, (1 << CS00) | (1 << WGM00)|(1 << WGM01)|(1 << COM01) // WGM00 WGM01 == 11 => PWM
+	ldi	temp, (1 << CS00) | (1 << WGM00)|(1 << WGM01)|(1 << COM01) // fast PWM
+	out TCCR0, temp
 
-	outi TCCR2, (1 << CS20) | (1 << WGM20)|(1 << WGM21)|(1 << COM21) // WGM00 WGM01 == 11 => PWM
+	ldi	temp, (1 << CS20) | (1 << WGM20)|(1 << WGM21)|(1 << COM21) // fast PWM
+	out TCCR2, temp
 
-	outi ADMUX, (1 << REFS0) | (1 << ADLAR) //Изначально - с 0-го пина считываем АЦП
+	ldi temp, (1 << REFS0) | (1 << ADLAR) // read 0 pin ADC
+	out ADMUX, temp
 
-	outi ADCSRA, (1 << ADEN) | (1 << ADSC) | (1 << ADATE) | (1 << ADIE) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0)
+	ldi temp, (1 << ADEN) | (1 << ADSC) | (1 << ADATE) | (1 << ADIE) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0)
+	out ADCSRA, temp
 
 start:
 	rjmp start
@@ -57,14 +50,16 @@ handler_part:
 	brne first_port_flag
 	
 zero_port_flag:
-	outi ADMUX, (1 << REFS0)|(1 << ADLAR)|(1 << MUX0)//change port configure - Muxes bits - change 0 to 1 port
+	ldi temp, (1 << REFS0)|(1 << ADLAR)|(1 << MUX0) //change 0 to 1 port
+	out ADMUX, temp
 	in port0, ADCH
 	out OCR0, port0
 	ldi flag, 1
 	ret
 
 first_port_flag:
-	outi ADMUX, (1 << REFS0)|(1 << ADLAR) //change port configure - Muxes bits - change 1 to 0 port
+	ldi temp, (1 << REFS0)|(1 << ADLAR) //change 1 to 0 port
+	out ADMUX, temp
 	in port1, ADCH
 	out OCR2, port1
 	ldi flag, 0
