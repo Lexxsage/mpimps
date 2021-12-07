@@ -6,13 +6,13 @@
 #include <avr/interrupt.h>
 #include <stdbool.h>
 
-uint8_t result = 0;
 uint8_t temp = 0;
 
-#define BUFFER0_MAX_SIZE 3 // макс. длина строки
+#define BUFFER0_MAX_SIZE 40 // макс. длина строки
 char buffer0[BUFFER0_MAX_SIZE]; // строка
 unsigned int buffer0_size = 0; //текущий размер строки
 bool buffer0_complete = false; //строка в буфере получена полностью
+char buffer_res[BUFFER0_MAX_SIZE];
 
 bool show_result = false;
 bool show_error = false;
@@ -114,7 +114,9 @@ ISR(USART_RXC_vect) {
 		buffer0[buffer0_size] = 0; // добавляем ноль в конец строки (признак её окончания)
 		buffer0_complete = true; // признак получения полной строки для гл. цикла
 	}
+}
 
+void calc_result(){
 	if (buffer0[0]=='i')
 	{
 		is_need_minus = false;
@@ -148,8 +150,68 @@ ISR(USART_RXC_vect) {
 	}
 }
 
+void analyze_result(){
+	if (buffer0[0]=='i')
+	{
+		for(int i = 0; i< buffer0_size; i++){
+			buffer_res[i] = buffer0[i+1];
+		}
+		show_result = true;
+		show_error = false;
+	} else if (buffer0[0]=='d')
+	{
+		for(int i = 0; i <buffer0_size - 1; i++){
+			buffer_res[i] = buffer0[buffer0_size-i-1];
+		}
+		show_result = true;
+		show_error = false;
+	} else if (buffer0[0]=='s')
+	{
+		if(buffer0[1] == 'u'){			
+			for(int i = 2; i < buffer0_size; i++){
+				for (int k = buffer0_size-1; k> i; k--){
+					if (buffer0[k] < buffer0[k-1]){
+						char let = buffer0[k];
+						buffer0[k] = buffer0[k-1];
+						buffer0[k-1] = let;
+					}
+				}
+			}
+			for(int i = 0; i< buffer0_size; i++){
+					buffer_res[i] = buffer0[i+2];
+			}
+			show_result = true;
+			show_error = false;
+		} else if (buffer0[1] == 'd'){
+			for(int i = 2; i < buffer0_size; i++){
+				for (int k = buffer0_size-1; k> i; k--){
+					if (buffer0[k] > buffer0[k-1]){
+						char let = buffer0[k];
+						buffer0[k] = buffer0[k-1];
+						buffer0[k-1] = let;
+					}
+				}
+			}
+			for(int i = 0; i< buffer0_size; i++){
+				buffer_res[i] = buffer0[i+2];
+			}
+			show_result = true;
+			show_error = false;
+		}
+	}
+	else
+	{
+		show_error = true;
+		show_result = false;
+	}
+}
+
 void clean_buffer0 () {
 	buffer0[0] = 0; buffer0_size = 0; buffer0_complete = false; // очистка буфера
+}
+
+void clean_buffer_res() {
+	buffer_res[0] = 0;
 }
 
 int main(void) {
@@ -158,6 +220,9 @@ int main(void) {
 	USARTTransmitStringLn("Hi");
 	while (1) {
 		if(buffer0_complete){
+			analyze_result();
+			USARTTransmitString("You print: ");
+			USARTTransmitStringLn(buffer0);
 			if(show_result){
 				if(is_need_minus){
 					USARTTransmitString("Your result: ");
@@ -166,13 +231,14 @@ int main(void) {
 					USARTTransmitStringLn("");
 				} else {
 					USARTTransmitString("Your result: ");
-					USARTTransmitChar(temp);
+					USARTTransmitString(buffer_res);
 					USARTTransmitStringLn("");
 				}
 			} else if (show_error){
 				USARTTransmitStringLn("You got error");
 			} 
 			clean_buffer0();
+			clean_buffer_res();
 		} 
 	}
 }
