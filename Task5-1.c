@@ -122,6 +122,7 @@ int main() {
 	display_setting_cmd(1, 0, 0);
 	
 	print_string("Counter: ");
+	print_ASCII_by_num(1, 0, 15);
 	
 	for (int i = 0; ;++i) {
 		unsigned int a = i;
