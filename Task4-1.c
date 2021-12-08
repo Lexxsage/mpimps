@@ -85,7 +85,7 @@ ISR(USART_RXC_vect) {
 		switch (ch){
 			case (char)10://перевод строки игнорируем
 			break;
-			case (char)13:// . - окончание строки
+			case (char)13://CR - окончание строки
 			buffer0[buffer0_size] = 0; // добавляем ноль в конец строки (признак её окончания)
 			buffer0_complete = true; // признак получения полной строки для гл. цикла
 			break;
@@ -119,13 +119,14 @@ int main(void) {
 	sei();
 	USARTTransmitStringLn("Hi");
 	while (1) {
-		register char i = 0;
+		//register char i = 0;
 		if(buffer0_complete){
-			while(buffer0[i]){
+			//while(buffer0[i]){
 				USARTTransmitString("You send: ");
-				USARTTransmitChar(buffer0[i++]);
-				USARTTransmitStringLn("");
-			}
+				USARTTransmitStringLn(buffer0);
+				//USARTTransmitChar(buffer0[i++]);
+				//USARTTransmitStringLn("");
+			//}
 			clean_buffer0();
 		}
 	}

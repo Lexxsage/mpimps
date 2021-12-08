@@ -211,7 +211,7 @@ void clean_buffer0 () {
 }
 
 void clean_buffer_res() {
-	buffer_res[0] = 0;
+	buffer_res[0] = 0; // очистка буфера результата
 }
 
 int main(void) {
@@ -224,16 +224,16 @@ int main(void) {
 			USARTTransmitString("You print: ");
 			USARTTransmitStringLn(buffer0);
 			if(show_result){
-				if(is_need_minus){
+				/*if(is_need_minus){
 					USARTTransmitString("Your result: ");
 					USARTTransmitChar('-');
 					USARTTransmitChar(temp);
 					USARTTransmitStringLn("");
-				} else {
+				} else {*/
 					USARTTransmitString("Your result: ");
-					USARTTransmitString(buffer_res);
-					USARTTransmitStringLn("");
-				}
+					USARTTransmitStringLn(buffer_res);
+					//USARTTransmitStringLn("");
+				//}
 			} else if (show_error){
 				USARTTransmitStringLn("You got error");
 			} 
