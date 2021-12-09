@@ -198,6 +198,11 @@ void analyze_result(){
 			show_result = true;
 			show_error = false;
 		}
+		else
+		{
+			show_error = true;
+			show_result = false;
+		}
 	}
 	else
 	{
@@ -232,7 +237,6 @@ int main(void) {
 				} else {*/
 					USARTTransmitString("Your result: ");
 					USARTTransmitStringLn(buffer_res);
-					//USARTTransmitStringLn("");
 				//}
 			} else if (show_error){
 				USARTTransmitStringLn("You got error");

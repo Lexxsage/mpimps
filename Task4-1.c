@@ -119,14 +119,9 @@ int main(void) {
 	sei();
 	USARTTransmitStringLn("Hi");
 	while (1) {
-		//register char i = 0;
 		if(buffer0_complete){
-			//while(buffer0[i]){
-				USARTTransmitString("You send: ");
-				USARTTransmitStringLn(buffer0);
-				//USARTTransmitChar(buffer0[i++]);
-				//USARTTransmitStringLn("");
-			//}
+			USARTTransmitString("You send: ");
+			USARTTransmitStringLn(buffer0);
 			clean_buffer0();
 		}
 	}
